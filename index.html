@@ -30,12 +30,35 @@
   <p id="status" style="margin-top:20px; color:#cccccc;"></p>
 
   <script>
-    // Initialize Supabase client
+    // 🔹 Replace these with your Supabase project values
     const supabase = window.supabase.createClient(
       "https://YOUR_PROJECT_ID.supabase.co",
       "YOUR_PUBLIC_ANON_KEY"
     );
 
+    // 🔹 Recover the auth session from the reset link
+    async function initSession() {
+      const { data, error } = await supabase.auth.getSession();
+
+      if (!data.session) {
+        // If no session yet, try to exchange the token from the URL
+        const hash = window.location.hash;
+        if (hash) {
+          const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(hash);
+          if (error) {
+            console.error("Error restoring session:", error.message);
+            document.getElementById("status").innerText = "❌ Failed to restore session.";
+          } else {
+            console.log("✅ Session restored:", session);
+          }
+        }
+      }
+    }
+
+    // Call session init on page load
+    initSession();
+
+    // 🔹 Handle password update
     async function resetPassword() {
       const newPass = document.getElementById("newpass").value;
       const confirmPass = document.getElementById("confirmpass").value;
