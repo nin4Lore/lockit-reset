@@ -1,27 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Reset Password - LockIT</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body style="background:#1e1e1e; color:white; font-family:Arial; text-align:center; padding:50px;">
+
+  <h1 style="color:#ffffff;">LockIT</h1>
   <h2>Reset Your Password</h2>
-  <input id="newpass" type="password" placeholder="Enter new password" style="padding:10px; width:250px;">
+  <p>Please enter your new password below.</p>
+
+  <!-- Password field -->
+  <input id="newpass" type="password" placeholder="New Password"
+         style="padding:10px; width:250px; border-radius:5px; margin:10px;">
+  <br>
+
+  <!-- Confirm Password field -->
+  <input id="confirmpass" type="password" placeholder="Confirm Password"
+         style="padding:10px; width:250px; border-radius:5px; margin:10px;">
   <br><br>
-  <button onclick="resetPassword()" style="padding:10px 20px;">Update Password</button>
-  <p id="status"></p>
+
+  <!-- Submit Button -->
+  <button onclick="resetPassword()" 
+          style="padding:12px 24px; background:#4a90e2; border:none; border-radius:6px; color:white; font-size:16px; cursor:pointer;">
+    Update Password
+  </button>
+
+  <p id="status" style="margin-top:20px; color:#cccccc;"></p>
 
   <script>
+    // Initialize Supabase client
     const supabase = window.supabase.createClient(
-      "https://YOUR_PROJECT_URL.supabase.co",
+      "https://YOUR_PROJECT_ID.supabase.co",
       "YOUR_PUBLIC_ANON_KEY"
     );
 
     async function resetPassword() {
-      const newPassword = document.getElementById("newpass").value;
-      const { data, error } = await supabase.auth.updateUser({ password: newPassword });
-      document.getElementById("status").innerText = error ? error.message : "Password updated successfully!";
+      const newPass = document.getElementById("newpass").value;
+      const confirmPass = document.getElementById("confirmpass").value;
+      const status = document.getElementById("status");
+
+      if (!newPass || !confirmPass) {
+        status.innerText = "⚠️ Please fill in both fields.";
+        return;
+      }
+
+      if (newPass !== confirmPass) {
+        status.innerText = "⚠️ Passwords do not match.";
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.auth.updateUser({ password: newPass });
+        if (error) {
+          status.innerText = "❌ " + error.message;
+        } else {
+          status.innerText = "✅ Password updated successfully! You can now log in.";
+        }
+      } catch (err) {
+        status.innerText = "❌ Unexpected error: " + err.message;
+      }
     }
   </script>
+
 </body>
 </html>
